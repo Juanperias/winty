@@ -69,7 +69,6 @@ impl GlHandler {
         };
         let context = not_current_context.make_current(&surface)?;
 
-
         Ok(Self {
             display,
             context,

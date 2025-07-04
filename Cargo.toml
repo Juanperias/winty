@@ -12,5 +12,5 @@ license = "Apache-2.0"
 
 
 [workspace]
-members = [ "winty-gl", "winty-x11" ]
+members = [ "winty-core", "winty-gl", "winty-x11" ]
 
