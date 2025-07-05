@@ -9,7 +9,8 @@ license = "Apache-2.0"
 
 
 [dependencies]
-
+winty-x11 = { path = "./winty-x11" }
+winty-core = { path = "./winty-core" }
 
 [workspace]
 members = [ "winty-core", "winty-gl", "winty-x11" ]

@@ -328,10 +328,17 @@ checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
 [[package]]
 name = "winty"
 version = "0.1.0"
+dependencies = [
+ "winty-core",
+ "winty-x11",
+]
 
 [[package]]
 name = "winty-core"
 version = "0.1.0"
+dependencies = [
+ "winty-gl",
+]
 
 [[package]]
 name = "winty-gl"
@@ -346,6 +353,9 @@ dependencies = [
 name = "winty-x11"
 version = "0.1.0"
 dependencies = [
+ "raw-window-handle",
+ "thiserror",
+ "winty-core",
  "winty-gl",
  "xcb",
 ]

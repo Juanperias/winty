@@ -5,5 +5,8 @@ edition = "2024"
 
 [dependencies]
 winty-gl = { path = "../winty-gl" }
+winty-core = { path = "../winty-core" }
+raw-window-handle = "0.6.2"
+thiserror = "2.0.12"
 xcb = "1.5.0"
 

@@ -1,4 +1,4 @@
-use std::num::NonZero;
+use std::{ffi::{c_void, CStr}, num::NonZero};
 
 use glutin::{api::egl::{context::PossiblyCurrentContext, display::Display, surface::Surface}, config::{ConfigTemplate, ConfigTemplateBuilder, GetGlConfig, GlConfig}, context::{ContextApi, ContextAttributesBuilder, GlProfile, Version}, display::GetGlDisplay, prelude::{GlDisplay, NotCurrentGlContext, PossiblyCurrentGlContext}, surface::{GlSurface, SurfaceAttributes, SurfaceAttributesBuilder, WindowSurface}};
 use raw_window_handle::{RawDisplayHandle, RawWindowHandle};
@@ -63,7 +63,7 @@ impl GlHandler {
         };
 
         let gl_config = not_current_context.config();
-        let surface_attrs: SurfaceAttributes<WindowSurface> = SurfaceAttributesBuilder::<WindowSurface>::default().build(window_handle, NonZero::new(size.0).unwrap(), NonZero::new(size.1).unwrap());
+        let surface_attrs: SurfaceAttributes<WindowSurface> = SurfaceAttributesBuilder::<WindowSurface>::default().build(window_handle, NonZero::new(size.0).expect("Width cannot be 0"), NonZero::new(size.1).expect("Height cannot be 0"));
         let surface = unsafe {
             gl_config.display().create_window_surface(&config, &surface_attrs)?
         };
@@ -74,6 +74,9 @@ impl GlHandler {
             context,
             surface
         })
+    }
+    pub fn get_proc_address(&self, proc: &CStr) -> *const c_void {
+        self.display.get_proc_address(proc)
     }
     pub fn swap_buffers(&self) -> Result<(), GlHandlerError> {
         self.surface.swap_buffers(&self.context)?;
