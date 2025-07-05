@@ -1,4 +1,5 @@
 use std::ffi::c_void;
+use std::fmt::Debug;
 
 pub use winty_gl::GlHints;
 pub use winty_gl::Profile;
@@ -13,7 +14,17 @@ pub trait Window {
     fn event_pump(&self) -> Result<impl EventPump, Self::Error>;
 }
 
-pub trait EventPump {}
+pub trait EventPump {
+    type Error: Debug;
+    fn wait_for_event(&self) -> Result<Event, Self::Error>;
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Event {
+    Redraw,
+    Unknown,
+    // TODO: put more events
+}
 
 #[derive(Debug)]
 pub struct WinOpts {

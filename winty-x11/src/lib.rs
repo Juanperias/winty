@@ -1,7 +1,7 @@
-use std::{ffi::{c_void, CString}, num::NonZeroU32, ptr::NonNull};
+use std::{ffi::{c_void, CString}, num::NonZeroU32, ptr::NonNull, sync::Arc};
 
 use raw_window_handle::{RawDisplayHandle, RawWindowHandle, XcbDisplayHandle, XcbWindowHandle};
-use winty_core::{EventPump, WinOpts, Window};
+use winty_core::{Event, EventPump, WinOpts, Window};
 use thiserror::Error;
 use winty_gl::{GlHandler, GlHandlerError, GlHints};
 use xcb::{x, Connection, Xid};
@@ -34,7 +34,7 @@ pub enum X11Error {
 }
 
 pub struct X11Window {
-    conn: Connection,
+    conn: Arc<Connection>,
     window: x::Window,
     gl_context: GlHandler,
     opts: WinOpts,
@@ -46,6 +46,8 @@ impl Window for X11Window {
     fn create(opts: WinOpts, hints: GlHints) -> Result<Self, Self::Error>
             where Self: Sized {
         let (conn, screen_num) = xcb::Connection::connect(None)?;
+        let conn = Arc::new(conn);
+        
         let setup = conn.get_setup();
         let raw_conn = NonNull::new(conn.get_raw_conn() as *mut c_void).unwrap();
 
@@ -155,10 +157,24 @@ impl Window for X11Window {
         self.gl_context.get_proc_address(cstring.as_c_str())
     }
     fn event_pump(&self) -> Result<impl EventPump, Self::Error> {
-        Ok(X11EventPump)        
+        Ok(X11EventPump {
+            conn: Arc::clone(&self.conn),
+            win: self.window
+        })    
     }
 }
 
-pub struct X11EventPump;
+pub struct X11EventPump {
+    conn: Arc<Connection>,
+    win: x::Window,
+}
 
-impl EventPump for X11EventPump {}
+impl EventPump for X11EventPump {
+    type Error = X11Error;
+    fn wait_for_event(&self) -> Result<Event, Self::Error> {
+        Ok(match self.conn.wait_for_event()? {
+           xcb::Event::X(x::Event::Expose(_)) => Event::Redraw, 
+           _ => Event::Unknown,
+        })
+    }
+}
