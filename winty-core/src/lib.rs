@@ -32,7 +32,7 @@ pub enum Event {
     // TODO: put more events
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct WinOpts {
     pub title: String,
     pub size: (u16, u16),

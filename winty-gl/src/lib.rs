@@ -10,13 +10,13 @@ pub enum GlHandlerError {
     GlutinError(#[from] glutin::error::Error)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct GlHints {
     pub version: (u8, u8),
     pub profile: Profile,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Profile {
     Core,
     Compatibility,

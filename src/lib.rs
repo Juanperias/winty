@@ -1,0 +1,154 @@
+use thiserror::Error;
+
+#[cfg(not(any(feature = "x11")))]
+compile_error!("You must have at least one feature activated");
+
+#[derive(Error, Debug)]
+pub enum WintyError {
+    #[cfg(feature = "x11")]
+    #[error("{0}")]
+    X11Error(#[from] winty_x11::X11Error),
+
+
+}
+
+
+#[cfg(feature = "x11")]
+pub mod x11 {
+    pub use winty_x11::{X11Window, X11EventPump};    
+}
+
+pub mod window {
+    pub use winty_core::{Window, Profile, GlHints, WinOpts};
+    #[cfg(feature = "x11")]
+    pub use winty_x11::X11Window;
+
+    pub enum WintyWindow {
+        #[cfg(feature = "x11")]
+        X11(X11Window),
+    }
+
+    impl Window for WintyWindow {
+        type Error = crate::WintyError;
+
+        /// never call WintyBackend::create
+        fn create(_opts: WinOpts, _hints: GlHints) -> Result<Self, Self::Error>
+                where Self: Sized {
+            panic!("never call WintyBackend::create");
+        }
+
+        fn gl_swap_buffers(&mut self) -> Result<(), Self::Error> {
+            match self {
+                #[cfg(feature = "x11")]
+                Self::X11(x) => x.gl_swap_buffers()?,
+               
+                #[cfg(not(any(feature = "x11")))]
+                _ => {
+                    compile_error!("You must have at least one feature activated");
+                    unreachable!();
+                },
+
+                #[allow(unreachable_patterns)]
+                _ => {
+                    panic!("Cannot create a window for your platform");
+                },
+            };
+            Ok(())
+        }
+        fn event_pump(&mut self) -> Result<impl crate::event::EventPump, Self::Error> {
+            let pump = match self {
+                #[cfg(feature = "x11")]
+                Self::X11(x) => x.event_pump(),
+                
+                #[cfg(not(any(feature = "x11")))]
+                _ => {
+                    compile_error!("You must have at least one feature activated");
+                    unreachable!();
+                },
+
+                #[allow(unreachable_patterns)]
+                 _ => {
+                    panic!("Cannot create a window for your platform");
+                },
+            }?;
+            
+            Ok(pump)
+        }
+        fn gl_get_proc_address(&self, proc: &str) -> *const std::ffi::c_void {
+            match self {
+                #[cfg(feature = "x11")]
+                Self::X11(x) => x.gl_get_proc_address(proc),
+
+                #[cfg(not(any(feature = "x11")))]
+                _ => {
+                    compile_error!("You must have at least one feature activated");
+                    unreachable!();
+                },
+
+                #[allow(unreachable_patterns)]
+                _ => {
+                    panic!("Cannot create a window for your platform");
+                },
+            }
+        }
+     
+        fn toggle_fullscreen(&mut self) -> Result<(), Self::Error> {
+            match self {
+                #[cfg(feature = "x11")]
+                Self::X11(x) => x.toggle_fullscreen()?,
+
+                #[cfg(not(any(feature = "x11")))]
+                _ => {
+                     compile_error!("You must have at least one feature activated");
+                     unreachable!();
+                },
+
+                #[allow(unreachable_patterns)]
+                _ => {
+                    panic!("Cannot create a window for your platform");
+                },
+            };
+
+            Ok(())
+        }
+    }
+
+    pub struct WindowBuilder {
+        win_opts: crate::window::WinOpts,
+        gl_hints: crate::window::GlHints,
+    }
+
+    impl WindowBuilder {
+        pub fn create() -> Self {
+            Self {
+                win_opts: WinOpts {
+                    title: "Winty Window".to_string(),
+                    size: (800, 600),
+                    pos: (0, 0),
+                    fullscreen: false,
+                    border_width: 10,
+                },
+                gl_hints: GlHints {
+                    version: (3, 2),
+                    profile: Profile::Core,
+                }
+            }
+        }
+        pub fn build(&self) -> Result<WintyWindow, crate::WintyError> {
+            if std::env::var("DISPLAY").is_ok() {
+                #[cfg(feature = "x11")]
+                return Ok(WintyWindow::X11(X11Window::create(self.win_opts.clone(), self.gl_hints)?));
+            }
+
+            panic!("Cannot create window for your platform");
+        }
+    }
+}
+
+pub mod key {
+    pub use winty_core::key::Code;
+}
+
+pub mod event {
+    pub use winty_core::{Event, EventPump};
+}

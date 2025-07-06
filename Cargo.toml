@@ -6,12 +6,14 @@ edition = "2024"
 license = "Apache-2.0"
 
 [features]
-
+default = ["x11"]
+x11 = ["winty-x11"]
 
 [dependencies]
-winty-x11 = { path = "./winty-x11" }
+winty-x11 = { path = "./winty-x11", optional = true }
 winty-core = { path = "./winty-core" }
+thiserror = "2.0.12"
 
 [workspace]
-members = [ "winty-core", "winty-gl", "winty-x11" ]
+members = [ "winty-core", "winty-example", "winty-gl", "winty-x11" ]
 
