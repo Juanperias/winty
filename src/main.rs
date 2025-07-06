@@ -18,18 +18,24 @@ unsafe extern "C" {
 
 
 fn main() {
-    let window = X11Window::create(winty_core::WinOpts { title: "Winty Window".to_string(), size: (200, 200), pos: (0, 0), fullscreen: true, border_width: 20 }, winty_core::GlHints { version: (3, 2), profile: winty_core::Profile::Core  }).unwrap();
-    
+    let mut window = X11Window::create(winty_core::WinOpts { title: "Winty Window".to_string(), size: (200, 200), pos: (0, 0), fullscreen: true, border_width: 20 }, winty_core::GlHints { version: (3, 2), profile: winty_core::Profile::Core  }).unwrap();
     unsafe { glViewport(0, 0, 200, 200); }
         
+    window.toggle_fullscreen().unwrap();
+
     loop {
-        match window.event_pump().unwrap().wait_for_event().unwrap() {
+        let pump = window.event_pump().unwrap().wait_for_event().unwrap();
+        match pump {
             Event::Redraw => {
                 unsafe {
                     glClearColor(1.0, 0.5, 0.0, 1.0);
                     glClear(0x00004000);
                 }
                 window.gl_swap_buffers().unwrap();
+            },
+            Event::KeyPress(winty_core::key::Code::F) => {
+                println!("!");
+                window.toggle_fullscreen().unwrap();
             },
             _ => {},
         }

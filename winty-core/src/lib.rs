@@ -3,15 +3,20 @@ use std::fmt::Debug;
 
 pub use winty_gl::GlHints;
 pub use winty_gl::Profile;
+pub mod key;
 
 pub trait Window {
     type Error;
     fn create(opts: WinOpts, hints: GlHints) -> Result<Self, Self::Error>
         where Self: Sized;
-    fn toggle_fullscreen(&self) -> Result<(), Self::Error>;
-    fn gl_swap_buffers(&self) -> Result<(), Self::Error>;
+    fn toggle_fullscreen(&mut self) -> Result<(), Self::Error>;
+    fn gl_swap_buffers(&mut self) -> Result<(), Self::Error>;
     fn gl_get_proc_address(&self, proc: &str) -> *const c_void;
-    fn event_pump(&self) -> Result<impl EventPump, Self::Error>;
+    fn event_pump(&mut self) -> Result<impl EventPump, Self::Error>;
+}
+
+pub enum WName {
+    X11,
 }
 
 pub trait EventPump {
@@ -23,6 +28,7 @@ pub trait EventPump {
 pub enum Event {
     Redraw,
     Unknown,
+    KeyPress(crate::key::Code)
     // TODO: put more events
 }
 
