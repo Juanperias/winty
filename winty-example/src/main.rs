@@ -10,16 +10,17 @@ fn main() -> Result<(), WintyError> {
     }
 
     loop {
+        unsafe {
+            gl::ClearColor(1.0, 0.0, 0.0, 1.0);
+            gl::Clear(gl::COLOR_BUFFER_BIT);
+        }
+
+        win.gl_swap_buffers()?;
+
         {
             let pump = win.event_pump()?;
 
-            match pump.wait_for_event().unwrap() {
-                Event::Redraw => {
-                    unsafe {
-                        gl::ClearColor(1.0, 0.0, 0.0, 1.0);
-                        gl::Clear(gl::COLOR_BUFFER_BIT);
-                    }
-                },
+            match pump.wait_for_event().unwrap() { 
                 Event::KeyPress(winty::key::Code::Escape) => {
                     println!("Bye!");
                     break;
