@@ -1,7 +1,7 @@
 use winty::{event::{Event, EventPump}, window::{Window, WindowBuilder}, WintyError};  
 
 fn main() -> Result<(), WintyError> {
-    let mut win = WindowBuilder::create().build()?;
+    let mut win = WindowBuilder::create().title("Hello from winty!").build()?;
 
     gl::load_with(|proc| win.gl_get_proc_address(proc));
 

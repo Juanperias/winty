@@ -11,3 +11,4 @@ x11 = ["glutin/egl", "glutin/x11"]
 glutin = { version = "0.32.3", default-features = false, optional = true }
 raw-window-handle = "0.6.2"
 thiserror = "2.0.12"
+dpi = "0.1.2"

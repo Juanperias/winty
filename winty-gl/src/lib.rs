@@ -1,5 +1,6 @@
 use std::{ffi::{c_void, CStr}, num::NonZero};
 
+use dpi::PhysicalSize;
 use glutin::{api::egl::{context::PossiblyCurrentContext, display::Display, surface::Surface}, config::{ConfigTemplate, ConfigTemplateBuilder, GetGlConfig, GlConfig}, context::{ContextApi, ContextAttributesBuilder, GlProfile, Version}, display::GetGlDisplay, prelude::{GlDisplay, NotCurrentGlContext, PossiblyCurrentGlContext}, surface::{GlSurface, SurfaceAttributes, SurfaceAttributesBuilder, WindowSurface}};
 use raw_window_handle::{RawDisplayHandle, RawWindowHandle};
 use thiserror::Error;
@@ -38,7 +39,7 @@ pub struct GlHandler {
 }
 
 impl GlHandler {
-    pub fn new(display_handle: RawDisplayHandle, window_handle: RawWindowHandle, gl_hints: GlHints, size: (u32, u32)) -> Result<Self, GlHandlerError> {
+    pub fn new(display_handle: RawDisplayHandle, window_handle: RawWindowHandle, gl_hints: GlHints, size: PhysicalSize<u32>) -> Result<Self, GlHandlerError> {
         let display = unsafe {
             Display::new(display_handle)?
         };
@@ -63,7 +64,7 @@ impl GlHandler {
         };
 
         let gl_config = not_current_context.config();
-        let surface_attrs: SurfaceAttributes<WindowSurface> = SurfaceAttributesBuilder::<WindowSurface>::default().build(window_handle, NonZero::new(size.0).expect("Width cannot be 0"), NonZero::new(size.1).expect("Height cannot be 0"));
+        let surface_attrs: SurfaceAttributes<WindowSurface> = SurfaceAttributesBuilder::<WindowSurface>::default().build(window_handle, NonZero::new(size.width).expect("Width cannot be 0"), NonZero::new(size.height).expect("Height cannot be 0"));
         let surface = unsafe {
             gl_config.display().create_window_surface(&config, &surface_attrs)?
         };

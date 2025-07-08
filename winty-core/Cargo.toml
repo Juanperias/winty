@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 winty-gl = { path = "../winty-gl" }
+winty-dpi = { path = "../winty-dpi" }

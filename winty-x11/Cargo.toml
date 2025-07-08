@@ -8,6 +8,7 @@ winty-gl = { path = "../winty-gl" }
 winty-core = { path = "../winty-core" }
 raw-window-handle = "0.6.2"
 thiserror = "2.0.12"
-xcb = { version = "1.5.0", features = ["xkb"] }
+xcb = { version = "1.5.0", features = ["xkb", "randr"] }
 xkbcommon = { version = "0.8.0", default-features = false, features = ["x11", "memmap2"] }
 as-raw-xcb-connection = "1.0.1"
+winty-dpi = { path = "../winty-dpi" }

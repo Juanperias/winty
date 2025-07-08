@@ -20,6 +20,7 @@ pub mod x11 {
 
 pub mod window {
     pub use winty_core::{Window, Profile, GlHints, WinOpts};
+    use winty_dpi::{PhysicalPosition, PhysicalSize};
     #[cfg(feature = "x11")]
     pub use winty_x11::X11Window;
 
@@ -123,8 +124,8 @@ pub mod window {
             Self {
                 win_opts: WinOpts {
                     title: "Winty Window".to_string(),
-                    size: (800, 600),
-                    pos: (0, 0),
+                    size: crate::dpi::Size::Physical(PhysicalSize::new(800, 600)),
+                    pos: crate::dpi::Pos::Physical(PhysicalPosition::new(600, 600)),
                     fullscreen: false,
                     border_width: 10,
                 },
@@ -133,6 +134,34 @@ pub mod window {
                     profile: Profile::Core,
                 }
             }
+        }
+        pub fn title<T: Into<String>>(mut self, title: T) -> Self {
+            self.win_opts.title = title.into(); 
+            self
+        }
+        pub fn size(mut self, size: crate::dpi::Size) -> Self {
+            self.win_opts.size = size;
+            self
+        }
+        pub fn pos(mut self, pos: crate::dpi::Pos) -> Self {
+            self.win_opts.pos = pos;
+            self
+        }
+        pub fn fullscreen(mut self, fullscreen: bool) -> Self {
+            self.win_opts.fullscreen = fullscreen;
+            self
+        }
+        pub fn gl_version(mut self, version: (u8, u8)) -> Self {
+            self.gl_hints.version = version;
+            self
+        }
+        pub fn profile(mut self, profile: Profile) -> Self {
+            self.gl_hints.profile = profile;
+            self
+        }
+        pub fn border_width(mut self, border_width: u16) -> Self {
+            self.win_opts.border_width = border_width;
+            self
         }
         pub fn build(&self) -> Result<WintyWindow, crate::WintyError> {
             if std::env::var("DISPLAY").is_ok() {
@@ -143,6 +172,10 @@ pub mod window {
             panic!("Cannot create window for your platform");
         }
     }
+}
+
+pub mod dpi {
+    pub use winty_dpi::{Pos, Size, LogicalPosition, LogicalSize, PhysicalPosition, PhysicalSize, Pixel};
 }
 
 pub mod key {

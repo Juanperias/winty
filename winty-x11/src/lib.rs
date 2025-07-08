@@ -5,7 +5,7 @@ use raw_window_handle::{RawDisplayHandle, RawWindowHandle, XcbDisplayHandle, Xcb
 use winty_core::{Event, EventPump, WinOpts, key, Window};
 use thiserror::Error;
 use winty_gl::{GlHandler, GlHandlerError, GlHints};
-use xcb::{x, xkb, Connection, Xid};
+use xcb::{x, randr, xkb, Connection, Xid};
 use xkbcommon::xkb::Keymap;
 
 xcb::atoms_struct! {
@@ -102,28 +102,44 @@ impl Window for X11Window {
         conn.check_request(cookie)?;
     }
 
+        let reply = conn.wait_for_reply(conn.send_request(&randr::GetScreenInfo {
+            window: screen.root(),
+        }))?;
+
+        let size = reply.sizes().iter().enumerate().find_map(|(i, size)| {
+            if i == screen_num as usize {
+                return Some(size);
+            } else {
+                return None;
+            }
+        }).expect(&format!("Cannot get size for screen {screen_num}"));
+
+        let dpi = ((size.width as f64) * 25.4) / size.mwidth as f64;
+        let scale_factor = dpi / 96.0;
+      
         let raw_xcb_wrapper = RawXcbWrapper(Arc::clone(&conn));
         let context = xkbcommon::xkb::Context::new(xkbcommon::xkb::COMPILE_NO_FLAGS);
         let device_id = xkbcommon::xkb::x11::get_core_keyboard_device_id(&raw_xcb_wrapper);
         let keymap = xkbcommon::xkb::x11::keymap_new_from_device(&context, &raw_xcb_wrapper, device_id, xkbcommon::xkb::KEYMAP_COMPILE_NO_FLAGS);
 
-        
-            
+        let pos = opts.pos.to_physical(scale_factor);
+        let size = opts.size.to_physical(scale_factor);    
+
         conn.send_request(&x::CreateWindow {
             depth: x::COPY_FROM_PARENT as u8,
             wid: window,
             parent: screen.root(),
-            x: opts.pos.0,
-            y: opts.pos.1,
-            width: opts.size.0,
-            height: opts.size.1,
+            x: pos.x,
+            y: pos.y,
+            width: size.width,
+            height: size.height,
             border_width: opts.border_width,
             class: x::WindowClass::InputOutput,
             visual: screen.root_visual(),
             value_list: &[
                 x::Cw::EventMask(x::EventMask::EXPOSURE | x::EventMask::KEY_PRESS)
             ],
-        });
+        }); 
 
         conn.send_request(&x::ChangeProperty {
             mode: x::PropMode::Replace,
@@ -183,7 +199,7 @@ impl Window for X11Window {
         let display_handle = RawDisplayHandle::Xcb(XcbDisplayHandle::new(Some(raw_conn), screen_num));
         let window_handle = RawWindowHandle::Xcb(XcbWindowHandle::new(NonZeroU32::new(window.resource_id()).unwrap()));
 
-        let gl_handle = GlHandler::new(display_handle, window_handle, hints, (opts.size.0 as u32, opts.size.1 as u32))?;
+        let gl_handle = GlHandler::new(display_handle, window_handle, hints, opts.size.to_physical(scale_factor))?;
 
         Ok(Self {
             gl_context: gl_handle,
@@ -247,7 +263,6 @@ impl EventPump for X11EventPump {
     type Error = X11Error;
     fn wait_for_event(&self) -> Result<Event, Self::Error> {
         Ok(match self.conn.wait_for_event()? {
-           xcb::Event::X(x::Event::Expose(_)) => Event::Redraw, 
            xcb::Event::X(x::Event::KeyPress(ev)) => {
                 let xcode = ev.detail() as usize;
                 if xcode >= self.keycode_table.len() {

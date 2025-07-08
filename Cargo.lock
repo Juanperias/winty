@@ -52,6 +52,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "dpi"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d8b14ccef22fc6f5a8f4d7d768562a182c04ce9a3b3157b91390b52ddfdf1a76"
+
+[[package]]
 name = "gl"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -355,6 +361,7 @@ version = "0.1.0"
 dependencies = [
  "thiserror",
  "winty-core",
+ "winty-dpi",
  "winty-x11",
 ]
 
@@ -362,7 +369,15 @@ dependencies = [
 name = "winty-core"
 version = "0.1.0"
 dependencies = [
+ "winty-dpi",
  "winty-gl",
+]
+
+[[package]]
+name = "winty-dpi"
+version = "0.1.0"
+dependencies = [
+ "dpi",
 ]
 
 [[package]]
@@ -377,6 +392,7 @@ dependencies = [
 name = "winty-gl"
 version = "0.1.0"
 dependencies = [
+ "dpi",
  "glutin",
  "raw-window-handle",
  "thiserror",
@@ -390,6 +406,7 @@ dependencies = [
  "raw-window-handle",
  "thiserror",
  "winty-core",
+ "winty-dpi",
  "winty-gl",
  "xcb",
  "xkbcommon",

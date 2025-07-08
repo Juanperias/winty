@@ -1,6 +1,8 @@
 use std::ffi::c_void;
 use std::fmt::Debug;
 
+use winty_dpi::Pos;
+use winty_dpi::Size;
 pub use winty_gl::GlHints;
 pub use winty_gl::Profile;
 pub mod key;
@@ -25,8 +27,7 @@ pub trait EventPump {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum Event {
-    Redraw,
+pub enum Event { 
     Unknown,
     KeyPress(crate::key::Code)
     // TODO: put more events
@@ -35,8 +36,8 @@ pub enum Event {
 #[derive(Debug, Clone)]
 pub struct WinOpts {
     pub title: String,
-    pub size: (u16, u16),
-    pub pos: (i16, i16),
+    pub size: Size,
+    pub pos: Pos,
     pub fullscreen: bool,
     pub border_width: u16
 }

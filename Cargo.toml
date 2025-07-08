@@ -12,8 +12,9 @@ x11 = ["winty-x11"]
 [dependencies]
 winty-x11 = { path = "./winty-x11", optional = true }
 winty-core = { path = "./winty-core" }
+winty-dpi = { path = "./winty-dpi" }
 thiserror = "2.0.12"
 
 [workspace]
-members = [ "winty-core", "winty-example", "winty-gl", "winty-x11" ]
+members = [ "winty-core", "winty-dpi", "winty-example", "winty-gl", "winty-x11" ]
 
