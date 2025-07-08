@@ -42,7 +42,8 @@ pub struct X11Window {
     gl_context: GlHandler,
     opts: WinOpts,
     atoms: Atoms,
-    keycode_table: [key::Code; 256]
+    keycode_table: [key::Code; 256],
+    scale_factor: f64,
 }
 
 struct RawXcbWrapper(Arc<xcb::Connection>);
@@ -207,9 +208,12 @@ impl Window for X11Window {
             window,
             opts,
             keycode_table: build_keycode_table(),
-            atoms
-        })
-    
+            atoms,
+            scale_factor
+        }) 
+    }
+    fn scale_factor(&self) -> f64 {
+        self.scale_factor
     }
     fn toggle_fullscreen(&mut self) -> Result<(), Self::Error> {
          if !self.opts.fullscreen {

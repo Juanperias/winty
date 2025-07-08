@@ -112,6 +112,22 @@ pub mod window {
 
             Ok(())
         }
+        fn scale_factor(&self) -> f64 {
+            match self {
+                Self::X11(x) => x.scale_factor(),
+
+                #[cfg(not(any(feature = "x11")))]
+                _ => {
+                     compile_error!("You must have at least one feature activated");
+                     unreachable!();
+                },
+
+                #[allow(unreachable_patterns)]
+                _ => {
+                    panic!("Cannot create a window for your platform");
+                },
+            }
+        }
     }
 
     pub struct WindowBuilder {

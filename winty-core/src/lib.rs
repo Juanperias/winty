@@ -14,6 +14,7 @@ pub trait Window {
     fn toggle_fullscreen(&mut self) -> Result<(), Self::Error>;
     fn gl_swap_buffers(&mut self) -> Result<(), Self::Error>;
     fn gl_get_proc_address(&self, proc: &str) -> *const c_void;
+    fn scale_factor(&self) -> f64;
     fn event_pump(&mut self) -> Result<impl EventPump, Self::Error>;
 }
 

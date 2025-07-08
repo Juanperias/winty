@@ -2,6 +2,7 @@ use winty::{event::{Event, EventPump}, window::{Window, WindowBuilder}, WintyErr
 
 fn main() -> Result<(), WintyError> {
     let mut win = WindowBuilder::create().title("Hello from winty!").build()?;
+    println!("Scale factor is {}", win.scale_factor());
 
     gl::load_with(|proc| win.gl_get_proc_address(proc));
 
